@@ -4,12 +4,11 @@ from datetime import date, timedelta
 import streamlit as st
 
 st.set_page_config(
-    page_title="Đăng ký vay vốn mua xe",
-    st.image("logo.jpg", width=150)
+    page_title="Đăng ký vay vốn mua xe",    
     page_icon="🚗",
     layout="centered"
 )
-
+st.image("logo.jpg", width=150)
 st.title("🚗 ĐƠN ĐĂNG KÝ VAY VỐN MUA XE")
 st.write("Vui lòng điền đầy đủ thông tin đề nghị vay vốn dưới đây.")
 
