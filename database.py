@@ -13,7 +13,7 @@ def get_connection():
 
         password="AVNS_uwfB8ePynsjV2HyJCSP",
 
-        database="defaultdb",
+        database="company1",
 
         ssl={
             "ca": "ca.pem"
