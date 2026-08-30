@@ -1,19 +1,51 @@
 import re
-from datetime import date, timedelta
+import json
+import base64
+import requests
+from datetime import date, datetime
 import streamlit as st
+
 st.set_page_config(
     page_title="Đăng ký vay vốn mua xe",
     page_icon="🚗",
     layout="centered"
 )
-st.image("image.png")
+
 st.title("🚗 ĐƠN ĐĂNG KÝ VAY VỐN MUA XE")
 st.write("Vui lòng điền đầy đủ thông tin đề nghị vay vốn dưới đây.")
 
 TODAY = date.today()
-MIN_BIRTH_DATE = TODAY.replace(year=TODAY.year - 100)  # giới hạn 100 tuổi
-MAX_BIRTH_DATE = TODAY.replace(year=TODAY.year - 18)   # phải đủ 18 tuổi
+MIN_BIRTH_DATE = TODAY.replace(year=TODAY.year - 100)
+MAX_BIRTH_DATE = TODAY.replace(year=TODAY.year - 18)
 DEFAULT_BIRTH_DATE = TODAY.replace(year=TODAY.year - 25)
+
+def save_to_github(data):
+    try:
+        token = st.secrets["GITHUB_TOKEN"]
+        repo = st.secrets["GITHUB_REPO"]
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        filename = f"submissions/don_vay_{timestamp}.json"
+        url = f"https://api.github.com/repos/{repo}/contents/{filename}"
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json"
+        }
+
+        json_str = json.dumps(data, ensure_ascii=False, indent=2)
+        content_encoded = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
+
+        payload = {
+            "message": f"Thêm đơn vay từ {data.get('ho_ten')}",
+            "content": content_encoded
+        }
+
+        res = requests.put(url, headers=headers, json=payload)
+        return res.status_code in [200, 201]
+    except Exception as e:
+        st.error(f"Lỗi kết nối GitHub: {e}")
+        return False
 
 with st.form("form_vay_mua_xe"):
 
@@ -79,7 +111,6 @@ with st.form("form_vay_mua_xe"):
 if submit:
     errors = []
 
-    # Bắt buộc nhập
     if not ho_ten.strip():
         errors.append("Vui lòng nhập Họ và tên.")
     if not dia_chi.strip():
@@ -87,23 +118,19 @@ if submit:
     if not hang_dong_xe.strip():
         errors.append("Vui lòng nhập Hãng xe & Dòng xe.")
 
-    # Validate CCCD: 9 hoặc 12 chữ số (CCCD/CMND) — không ràng buộc hộ chiếu vì đa dạng ký tự
     if not so_cccd.strip():
         errors.append("Vui lòng nhập Số CCCD/Hộ chiếu.")
     elif so_cccd.isdigit() and len(so_cccd) not in (9, 12):
         errors.append("Số CCCD/CMND phải gồm 9 hoặc 12 chữ số.")
 
-    # Validate số điện thoại Việt Nam: 10 số, bắt đầu bằng 0
     if not so_dien_thoai.strip():
         errors.append("Vui lòng nhập Số điện thoại.")
     elif not re.fullmatch(r"0\d{9}", so_dien_thoai.strip()):
         errors.append("Số điện thoại không hợp lệ (phải gồm 10 chữ số, bắt đầu bằng 0).")
 
-    # Validate email nếu có nhập
     if email.strip() and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email.strip()):
         errors.append("Email không hợp lệ.")
 
-    # Validate thu nhập, giá trị xe, số tiền vay phải > 0
     if thu_nhap <= 0:
         errors.append("Thu nhập hàng tháng phải lớn hơn 0.")
     if gia_tri_xe <= 0:
@@ -111,7 +138,6 @@ if submit:
     if so_tien_vay <= 0:
         errors.append("Số tiền đề nghị vay phải lớn hơn 0.")
 
-    # Validate số tiền vay không vượt quá giá trị xe (và tối đa 80% giá trị xe)
     if gia_tri_xe > 0 and so_tien_vay > 0:
         if so_tien_vay > gia_tri_xe:
             errors.append("Số tiền đề nghị vay không được vượt quá giá trị xe.")
@@ -122,23 +148,30 @@ if submit:
         for err in errors:
             st.error(err)
     else:
-        st.success("Gửi hồ sơ đăng ký vay thành công! Nhân viên sẽ sớm liên hệ lại với bạn.")
+        record = {
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "ho_ten": ho_ten.strip(),
+            "ngay_sinh": ngay_sinh.strftime("%Y-%m-%d"),
+            "gioi_tinh": gioi_tinh,
+            "so_cccd": so_cccd.strip(),
+            "so_dien_thoai": so_dien_thoai.strip(),
+            "email": email.strip(),
+            "tin_trang_hon_nhan": tin_trang_hon_nhan,
+            "dia_chi": dia_chi.strip(),
+            "ten_cong_ty": ten_cong_ty.strip(),
+            "chuc_vu": chuc_vu.strip(),
+            "thu_nhap": thu_nhap,
+            "chi_phi": chi_phi,
+            "tinh_trang_xe": tinh_trang_xe,
+            "hang_dong_xe": hang_dong_xe.strip(),
+            "gia_tri_xe": gia_tri_xe,
+            "muc_dich": muc_dich,
+            "so_tien_vay": so_tien_vay,
+            "thoi_gian_vay": thoi_gian_vay,
+            "tai_san_dam_bao": tai_san_dam_bao
+        }
 
-        st.write("### Thông tin hồ sơ đã đăng ký")
-
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.write("**Họ tên:**", ho_ten)
-            st.write("**Ngày sinh:**", ngay_sinh.strftime("%d/%m/%Y"))
-            st.write("**Số CCCD:**", so_cccd)
-            st.write("**Số điện thoại:**", so_dien_thoai)
-            st.write("**Địa chỉ:**", dia_chi)
-            st.write("**Thu nhập hàng tháng:**", f"{thu_nhap:,.0f} VNĐ")
-
-        with col_b:
-            st.write("**Loại xe:**", f"{tinh_trang_xe} - {hang_dong_xe}")
-            st.write("**Giá trị xe:**", f"{gia_tri_xe:,.0f} VNĐ")
-            st.write("**Số tiền vay đề xuất:**", f"{so_tien_vay:,.0f} VNĐ")
-            st.write("**Thời hạn vay:**", f"{thoi_gian_vay} tháng")
-            st.write("**Tài sản bảo đảm:**", tai_san_dam_bao)
-            st.write("**Mục đích:**", muc_dich)
+        if save_to_github(record):
+            st.success("Gửi hồ sơ đăng ký vay thành công! Hệ thống đã lưu dữ liệu.")
+        else:
+            st.warning("Đơn đăng ký được gửi nhưng không thể lưu tự động lên GitHub. Vui lòng liên hệ hỗ trợ.")
