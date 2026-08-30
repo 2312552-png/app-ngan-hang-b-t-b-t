@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Đăng ký vay vốn mua xe",
-    st.image("logo.jpg")
+    st.image("logo.jpg"),
     page_icon="🚗",
     layout="centered"
 )
