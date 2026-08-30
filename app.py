@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
-    st.image("pages/1788080128570_5669955905485759671_g3834108428451579181_8730fef77c1e7762f92b6f15ae59eba8.jpg")
+    st.image("logo.jpg")
     page_title="Đăng ký vay vốn mua xe",
     page_icon="🚗",
     layout="centered"
