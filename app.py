@@ -1,7 +1,6 @@
 import streamlit as st
 
 st.set_page_config(
-    st.image("logo.jpg")
     page_title="Đăng ký vay vốn mua xe",
     page_icon="🚗",
     layout="centered"
@@ -41,4 +40,14 @@ with st.form("form_vay_mua_xe"):
         thu_nhap = st.number_input("Thu nhập hàng tháng (VNĐ)", min_value=0, step=1000000, format="%d")
         chi_phi = st.number_input("Chi phí sinh hoạt hàng tháng (VNĐ)", min_value=0, step=1000000, format="%d")
 
-    # 3. Thông tin
+    # 3. Thông tin khoản vay
+    st.subheader("3. Thông tin khoản vay")
+    so_tien_vay = st.number_input("Số tiền muốn vay (VNĐ)", min_value=0, step=10000000, format="%d")
+    thoi_gian_vay = st.slider("Thời hạn vay (tháng)", min_value=6, max_value=84, value=36, step=6)
+
+    submitted = st.form_submit_button("Gửi đơn đăng ký")
+    if submitted:
+        if not ho_ten or not so_cccd or not so_dien_thoai or not dia_chi:
+            st.error("Vui lòng điền đầy đủ các thông tin bắt buộc (*)")
+        else:
+            st.success("Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.")
