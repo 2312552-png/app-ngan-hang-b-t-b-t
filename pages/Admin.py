@@ -3,12 +3,12 @@ import streamlit as st
 from database import get_connection
 
 st.set_page_config(
-    page_title="Quản lý hồ sơ vay mua xe",
+    page_title="Trang quản trị - Hồ sơ vay mua xe",
     page_icon="🚗",
     layout="wide"
 )
 
-# Khởi tạo session state duy trì đăng nhập
+# Khởi tạo session state duy trì trạng thái đăng nhập
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -33,9 +33,9 @@ if not st.session_state.logged_in:
             else:
                 st.error("Sai tên đăng nhập hoặc mật khẩu.")
 
-# Giao diện bảng điều khiển sau khi đăng nhập thành công
+# Giao diện sau khi đăng nhập thành công
 else:
-    # Nút đăng xuất ở thanh bên
+    # Thanh điều hướng sidebar
     with st.sidebar:
         st.write(f"👋 **Xin chào, {USERNAME}**")
         if st.button("Đăng xuất"):
@@ -47,33 +47,46 @@ else:
     try:
         conn = get_connection()
         
-        # Bảng dữ liệu lưu thông tin đăng ký vay mua xe
+        # Truy vấn lấy dữ liệu từ bảng vay_von_nganhang_butbut
         sql = """
         SELECT *
-        FROM dangky_vay_mua_xe
+        FROM vay_von_nganhang_butbut
         ORDER BY id DESC
         """
         df = pd.read_sql(sql, conn)
         conn.close()
 
-        st.subheader("📋 Danh sách hồ sơ đề nghị vay")
-
         if df.empty:
             st.info("Chưa có hồ sơ đăng ký nào trong hệ thống.")
         else:
-            # Tự động định dạng lại các cột tiền tệ và ngày tháng hiển thị
+            # Thống kê tổng quan nhanh
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Tổng số hồ sơ tiếp nhận", len(df))
+            with col2:
+                tong_tien = df["so_tien_vay_de_nghi"].sum() if "so_tien_vay_de_nghi" in df.columns else 0
+                st.metric("Tổng nhu cầu tiền vay đề nghị", f"{tong_tien:,.0f} VNĐ")
+
+            st.subheader("📋 Danh sách chi tiết hồ sơ")
+
+            # Định dạng các cột hiển thị trong bảng
             st.dataframe(
                 df,
                 use_container_width=True,
                 column_config={
-                    "thu_nhap": st.column_config.NumberColumn("Thu nhập (VNĐ)", format="%d VNĐ"),
-                    "chi_phi": st.column_config.NumberColumn("Chi phí (VNĐ)", format="%d VNĐ"),
-                    "gia_tri_xe": st.column_config.NumberColumn("Giá trị xe (VNĐ)", format="%d VNĐ"),
-                    "so_tien_vay": st.column_config.NumberColumn("Số tiền vay (VNĐ)", format="%d VNĐ"),
+                    "id": "ID",
+                    "ho_ten": "Họ và tên",
                     "ngay_sinh": st.column_config.DateColumn("Ngày sinh", format="DD/MM/YYYY"),
-                    "created_at": st.column_config.DatetimeColumn("Thời gian gửi", format="DD/MM/YYYY HH:mm")
+                    "ngay_cap_cccd": st.column_config.DateColumn("Ngày cấp CCCD", format="DD/MM/YYYY"),
+                    "tong_thu_nhap_hang_thang": st.column_config.NumberColumn("Tổng thu nhập (VNĐ)", format="%d VNĐ"),
+                    "chi_phi_sinh_hoat_hang_thang": st.column_config.NumberColumn("Chi phí sinh hoạt (VNĐ)", format="%d VNĐ"),
+                    "gia_tri_xe": st.column_config.NumberColumn("Giá trị xe (VNĐ)", format="%d VNĐ"),
+                    "so_tien_vay_de_nghi": st.column_config.NumberColumn("Tiền vay đề nghị (VNĐ)", format="%d VNĐ"),
+                    "thoi_gian_vay_thang": st.column_config.NumberColumn("Thời gian vay (Tháng)", format="%d tháng"),
+                    "thu_nhap_nguoi_dong_vay": st.column_config.NumberColumn("Thu nhập người đồng vay (VNĐ)", format="%d VNĐ"),
+                    "ngay_vay_von": st.column_config.DatetimeColumn("Thời gian đăng ký", format="DD/MM/YYYY HH:mm")
                 }
             )
-            
+
     except Exception as e:
         st.error(f"Lỗi kết nối cơ sở dữ liệu: {e}")
