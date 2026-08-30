@@ -2,13 +2,11 @@ import re
 from datetime import date, timedelta
 import streamlit as st
 st.set_page_config(
-    st.image("image.png")
     page_title="Đăng ký vay vốn mua xe",
     page_icon="🚗",
     layout="centered"
 )
-
-
+st.image("image.png")
 st.title("🚗 ĐƠN ĐĂNG KÝ VAY VỐN MUA XE")
 st.write("Vui lòng điền đầy đủ thông tin đề nghị vay vốn dưới đây.")
 
