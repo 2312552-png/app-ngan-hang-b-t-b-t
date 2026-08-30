@@ -5,15 +5,15 @@ def get_connection():
 
     conn = pymysql.connect(
 
-        host="mysql-3a5ef2bc-binhquytoc.a.aivencloud.com",
+        host="mysql-2170da25-dlu-b30a.c.aivencloud.com",
 
-        port=14483,
+        port=25334,
 
         user="avnadmin",
 
-        password="AVNS_TX2oBXmTGGjXba6p7j1",
+        password="AVNS_uwfB8ePynsjV2HyJCSP",
 
-        database="company",
+        database="defaultdb",
 
         ssl={
             "ca": "ca.pem"
