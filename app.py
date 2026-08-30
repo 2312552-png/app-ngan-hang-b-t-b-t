@@ -1,6 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
+   url ="https://chatgpt.com/s/m_6a93f1e1cae08191ba8057d4278f482e"
     page_title="Đăng ký vay vốn mua xe",
     page_icon="🚗",
     layout="centered"
