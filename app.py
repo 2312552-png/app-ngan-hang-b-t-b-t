@@ -2,10 +2,10 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Đăng ký vay vốn mua xe",
-    page_icon="🚗",
+    page_icon="🚗",
     layout="centered"
 )
-st.image("logo.jpg")
+
 st.title("🚗 ĐƠN ĐĂNG KÝ VAY VỐN MUA XE")
 st.write("Vui lòng điền đầy đủ thông tin đề nghị vay vốn dưới đây.")
 
@@ -51,4 +51,4 @@ with st.form("form_vay_mua_xe"):
             st.error("Vui lòng điền đầy đủ các thông tin bắt buộc (*)")
         else:
             st.success("Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.")
- sao ở đâu
+ giờ muốn nhét hình ảnh vào dòng nào
